@@ -4,7 +4,7 @@ set -x
 MODEL_PATH=Qwen/Qwen2.5-0.5B
 export VLLM_ATTENTION_BACKEND=XFORMERS
 export WANDB_API_KEY=aed6eff902037c69a53ae9a27392b6a997e6ec20
-SavePath=./saved_model/r++/
+SavePath=./saved_model_debug/r++/
 
 # =====================
 # Call trainer
@@ -38,14 +38,14 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
-    actor_rollout_ref.model.enable_gradient_checkpointing=True \
+    actor_rollout_ref.model.enable_gradient_checkpointing=False \
     actor_rollout_ref.actor.fsdp_config.param_offload=True \
     actor_rollout_ref.actor.fsdp_config.grad_offload=True \
     actor_rollout_ref.actor.fsdp_config.optimizer_offload=True \
     actor_rollout_ref.rollout.log_prob_micro_batch_size=32 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
     actor_rollout_ref.rollout.name=vllm \
-    actor_rollout_ref.rollout.gpu_memory_utilization=0.4 \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.6 \
     actor_rollout_ref.rollout.n=1 \
     actor_rollout_ref.ref.log_prob_micro_batch_size=32 \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
@@ -53,14 +53,14 @@ python3 -m verl.trainer.main_ppo \
     trainer.critic_warmup=0 \
     trainer.logger=['wandb'] \
     trainer.project_name='Re++_logic_KK' \
-    trainer.experiment_name='GRPO - Qwen-0.5B' \
+    trainer.experiment_name='GRPO - Qwen-0.5B - debug' \
     trainer.n_gpus_per_node=1 \
     trainer.nnodes=1 \
     trainer.default_local_dir=$SavePath \
     trainer.default_hdfs_dir=null \
     trainer.save_freq=10 \
     trainer.test_freq=10 \
-    trainer.total_epochs=5 $@ 2>&1 | tee grpo.log
+    trainer.total_epochs=5 $@ 2>&1 | tee debug.log
 
     # Remove GPU memory cache
     # Try to run for 1 node, read meaningful errors: where termination is happening. 
