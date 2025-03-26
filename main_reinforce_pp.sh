@@ -54,10 +54,13 @@ python3 -m verl.trainer.main_ppo \
     trainer.logger=['wandb'] \
     trainer.project_name='Re++_logic_KK' \
     trainer.experiment_name='GRPO - Qwen-0.5B' \
-    trainer.n_gpus_per_node=2 \
+    trainer.n_gpus_per_node=1 \
     trainer.nnodes=1 \
     trainer.default_local_dir=$SavePath \
     trainer.default_hdfs_dir=null \
     trainer.save_freq=10 \
     trainer.test_freq=10 \
     trainer.total_epochs=5 $@ 2>&1 | tee grpo.log
+
+    # Remove GPU memory cache
+    # Try to run for 1 node, read meaningful errors: where termination is happening. 
