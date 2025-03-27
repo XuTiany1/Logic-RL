@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pprint import pprint
 from typing import Type, Dict
+import torch
 
 import numpy as np
 from codetiming import Timer
@@ -605,6 +606,9 @@ class RayPPOTrainer(object):
 
         # we start from step 1
         self.global_steps += 1
+
+        # Free up unused GPU memory
+        torch.cuda.empty_cache()
 
         for epoch in range(self.config.trainer.total_epochs):
             for batch_dict in self.train_dataloader:

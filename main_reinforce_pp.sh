@@ -1,10 +1,10 @@
 # =====================
 # Hyperparam
 set -x
-MODEL_PATH=Qwen/Qwen2.5-0.5B
+MODEL_PATH=Qwen/Qwen2-0.5B-Instruct
 export VLLM_ATTENTION_BACKEND=XFORMERS
 export WANDB_API_KEY=aed6eff902037c69a53ae9a27392b6a997e6ec20
-SavePath=./saved_model_debug/r++/
+SavePath=./saved_model_debug/r++---0.5/
 
 # =====================
 # Call trainer
@@ -22,19 +22,19 @@ SavePath=./saved_model_debug/r++/
 #   actor_rollout_ref.actor.ppo_micro_batch_size : micro batch size for gradient accumulation
 #   
 python3 -m verl.trainer.main_ppo \
-    algorithm.adv_estimator=grpo \
+    algorithm.adv_estimator=reinforce_plus_plus \
     data.train_files=[./data/kk/instruct/3ppl/train.parquet,./data/kk/instruct/4ppl/train.parquet,./data/kk/instruct/5ppl/train.parquet,./data/kk/instruct/6ppl/train.parquet,./data/kk/instruct/7ppl/train.parquet] \
     data.val_files=data/kk/instruct/5ppl/test.parquet \
     data.train_batch_size=8 \
     data.val_batch_size=8 \
     data.max_prompt_length=400 \
-    data.max_response_length=768 \
+    data.max_response_length=1024 \
     actor_rollout_ref.model.path=$MODEL_PATH \
     +actor_rollout_ref.model.torch_dtype=fp16 \
     actor_rollout_ref.actor.optim.lr=3e-7 \
     actor_rollout_ref.model.use_remove_padding=True \
-    actor_rollout_ref.actor.ppo_mini_batch_size=8 \
-    actor_rollout_ref.actor.ppo_micro_batch_size=4 \
+    actor_rollout_ref.actor.ppo_mini_batch_size=16 \
+    actor_rollout_ref.actor.ppo_micro_batch_size=8 \
     actor_rollout_ref.actor.use_kl_loss=True \
     actor_rollout_ref.actor.kl_loss_coef=0.001 \
     actor_rollout_ref.actor.kl_loss_type=low_var_kl \
@@ -53,14 +53,14 @@ python3 -m verl.trainer.main_ppo \
     trainer.critic_warmup=0 \
     trainer.logger=['wandb'] \
     trainer.project_name='Re++_logic_KK' \
-    trainer.experiment_name='GRPO - Qwen-0.5B - debug' \
+    trainer.experiment_name='GRPO - Qwen-0.5B - Instruct' \
     trainer.n_gpus_per_node=1 \
     trainer.nnodes=1 \
     trainer.default_local_dir=$SavePath \
     trainer.default_hdfs_dir=null \
-    trainer.save_freq=10 \
+    trainer.save_freq=300 \
     trainer.test_freq=10 \
-    trainer.total_epochs=5 $@ 2>&1 | tee debug.log
+    trainer.total_epochs=10 $@ 2>&1 | tee Qwen-0.5B - Instruct.log
 
     # Remove GPU memory cache
     # Try to run for 1 node, read meaningful errors: where termination is happening. 
