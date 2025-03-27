@@ -60,7 +60,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.default_hdfs_dir=null \
     trainer.save_freq=300 \
     trainer.test_freq=10 \
-    trainer.total_epochs=10 $@ 2>&1 | tee Qwen-0.5B - Instruct.log
+    trainer.total_epochs=20 $@ 2>&1 | tee Qwen-0.5B - Instruct.log
 
     # Remove GPU memory cache
     # Try to run for 1 node, read meaningful errors: where termination is happening. 
