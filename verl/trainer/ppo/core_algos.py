@@ -150,9 +150,10 @@ def compute_grpo_outcome_advantage(token_level_rewards: torch.Tensor,
                 raise ValueError(f"no score in prompt index: {idx}")
         for i in range(bsz):
             scores[i] = (scores[i] - id2mean[index[i]]) 
-            # DR.GRPO Version: exclude std and 1/|o|
             # / (id2std[index[i]] + epsilon)
+            # DR.GRPO Version: exclude std and 1/|o| 
         # scores = scores.unsqueeze(-1).tile([1, response_length]) * eos_mask
+        scores = scores.unsqueeze(-1).expand(-1, response_length) * eos_mask
 
     return scores, scores
 
@@ -224,7 +225,9 @@ def compute_policy_loss(old_log_prob, log_prob, advantages, eos_mask, cliprange)
     negative_approx_kl = log_prob - old_log_prob
     ratio = torch.exp(negative_approx_kl)
     ppo_kl = verl_F.masked_mean(-negative_approx_kl, eos_mask)
-
+    # advantages = advantages.unsqueeze(-1).expand(-1, ratio.shape[1])
+    # print("Advantages Shape:", advantages.shape)
+    # print("Ratio Shape:", ratio.shape)
     pg_losses = -advantages * ratio
     pg_losses2 = -advantages * torch.clamp(ratio, 1.0 - cliprange, 1.0 + cliprange)
 
